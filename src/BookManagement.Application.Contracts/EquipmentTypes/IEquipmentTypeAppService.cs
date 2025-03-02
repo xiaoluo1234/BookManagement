@@ -1,8 +1,8 @@
+using Arim.Infrastructure.Inputs;
+using BookManagement.EntityExtensions;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
-using Arim.Ims.Equipments.EntityExtensions;
-using Arim.Infrastructure.Inputs;
 using Volo.Abp.Application.Services;
 
 namespace Arim.Ims.Equipments.EquipmentTypes;

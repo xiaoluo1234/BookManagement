@@ -1,4 +1,5 @@
-using Arim.Ims.Equipments.EntityExtensions;
+using BookManagement.EntityExtensions;
+using BookManagement.Equipments;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;

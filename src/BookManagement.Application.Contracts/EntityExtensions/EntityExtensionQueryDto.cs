@@ -3,7 +3,7 @@ using Arim.DynamicQuery.Domain.Shared.Paging;
 using System.Collections.Generic;
 using Volo.Abp.Application.Dtos;
 
-namespace Arim.Ims.Equipments.EntityExtensions
+namespace BookManagement.EntityExtensions
 {
     public class EntityExtensionQueryDto : PagedAndSortedResultRequestDto, IFilterable, IHasIsPage
     {

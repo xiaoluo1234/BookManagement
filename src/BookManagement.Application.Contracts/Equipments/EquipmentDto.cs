@@ -1,6 +1,4 @@
-using Arim.Ims.Equipments.EquipmentStates;
 using Arim.Ims.Equipments.EquipmentTypes;
-using Arim.Infrastructure.Definitions.Categories;
 using System;
 using System.Collections.Generic;
 using Volo.Abp.Application.Dtos;
@@ -21,25 +19,9 @@ public class EquipmentDto : EquipmentSimpleDto
     public List<EquipmentResourceSimpleDto> Resources { get; set; }
 
     /// <summary>
-    /// 属性
-    /// </summary>
-    public List<EquipmentPropertyDto> Properties { get; set; }
-
-    /// <summary>
-    /// 状态快照
-    /// </summary>
-    public List<EquipmentStateDto> States { get; set; }
-
-    /// <summary>
     /// 设备类型
     /// </summary>
     public EquipmentTypeDto EquipmentType { get; set; }
-
-    /// <summary>
-    /// 分类
-    /// </summary>
-    public List<CategoryDefinitionDto> Categories { get; set; }
-
 
 }
 

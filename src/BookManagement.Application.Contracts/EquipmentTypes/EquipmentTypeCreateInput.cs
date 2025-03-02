@@ -1,3 +1,4 @@
+using BookManagement.EquipmentTypes;
 using System;
 using System.ComponentModel.DataAnnotations;
 

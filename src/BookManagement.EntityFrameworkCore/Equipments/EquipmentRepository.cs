@@ -1,3 +1,4 @@
+using Arim.Ims.Equipments.EntityFrameworkCore;
 using BookManagement.Equipments.Exception;
 using System;
 using System.Linq;
@@ -12,8 +13,8 @@ namespace BookManagement.Equipments;
 /// <summary>
 /// 【设备定义 定义一个设备】仓储
 /// </summary>
-public class EquipmentRepository(IDbContextProvider<IEquipmentsDbContext> dbContextProvider)
-    : EfCoreRepository<IEquipmentsDbContext, Equipment, Guid>(dbContextProvider), 
+public class EquipmentRepository(IDbContextProvider<IBookManagementDbContext> dbContextProvider)
+    : EfCoreRepository<IBookManagementDbContext, Equipment, Guid>(dbContextProvider), 
         IEquipmentRepository
 {
     public override async Task<IQueryable<Equipment>> WithDetailsAsync()

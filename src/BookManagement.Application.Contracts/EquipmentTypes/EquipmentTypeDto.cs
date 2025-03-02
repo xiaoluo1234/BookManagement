@@ -34,8 +34,4 @@ public class EquipmentTypeDto : EntityDto<Guid>
     /// 描述
     /// </summary>
     public string? Remark { get; set; }
-    /// <summary>
-    /// 属性
-    /// </summary>
-    public List<EquipmentPropertyDto> Properties { get; set; }
 }

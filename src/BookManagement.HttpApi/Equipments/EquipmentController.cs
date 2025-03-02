@@ -1,10 +1,7 @@
-using Arim.Ims.Equipments.EntityExtensions;
-using Arim.Infrastructure.EntityExtension.EntityProperties;
 using Arim.Infrastructure.Inputs;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
-using Volo.Abp;
 using Volo.Abp.Application.Dtos;
 
 namespace Arim.Ims.Equipments.Equipments;
@@ -12,8 +9,6 @@ namespace Arim.Ims.Equipments.Equipments;
 /// <summary>
 /// 设备接口
 /// </summary>
-[Area(EquipmentsRemoteServiceConsts.ModuleName)]
-[RemoteService(Name = EquipmentsRemoteServiceConsts.RemoteServiceName)]
 [Route("api/equipments/equipments/")]
 public partial class EquipmentController(IEquipmentAppService equipmentAppService)
 {
@@ -92,52 +87,5 @@ public partial class EquipmentController(IEquipmentAppService equipmentAppServic
     public virtual async Task<EquipmentDto> GetAsync(Guid id, [FromQuery] EquipmentGetInfoInput input)
     {
         return await equipmentAppService.GetAsync(id, input);
-    }
-
-    /// <summary>
-    /// 获取设备属性
-    /// </summary>
-    /// <param name="equipmentCode"></param>
-    /// <param name="input"></param>
-    /// <returns></returns>
-    [HttpGet("properties/{equipmentCode}")]
-    public virtual async Task<PagedResultDto<EquipmentPropertyDto>> GetPropertiesAsync(string equipmentCode, [FromQuery] EntityExtensionGetListInput input)
-    {
-        return await equipmentAppService.GetPropertiesAsync(equipmentCode, input);
-    }
-
-    /// <summary>
-    /// 给设备添加属性
-    /// </summary>
-    /// <param name="equipmentCode"></param>
-    /// <param name="input"></param>
-    /// <returns></returns>
-    [HttpPost("/properties/{equipmentCode}")]
-    public virtual async Task<EntityPropertyDto> CreatePropertyAsync(string equipmentCode, [FromBody] EquipmentPropertyCreateInput input)
-    {
-        return await equipmentAppService.CreatePropertyAsync(equipmentCode, input);
-    }
-
-    /// <summary>
-    /// 更新设备属性
-    /// </summary>
-    /// <param name="id">设备属性的id</param>
-    /// <param name="input"></param>
-    /// <returns></returns>
-    [HttpPut("properties/{id}")]
-    public virtual async Task<EntityPropertyDto> UpdatePropertyAsync(Guid id, [FromBody] EquipmentPropertyUpdateInput input)
-    {
-        return await equipmentAppService.UpdatePropertyAsync(id, input);
-    }
-
-    /// <summary>
-    /// 删除设备属性
-    /// </summary>
-    /// <param name="id"></param>
-    /// <returns></returns>
-    [HttpDelete("properties/{id}/")]
-    public async Task DeletePropertyAsync([FromRoute] Guid id)
-    {
-        await equipmentAppService.DeletePropertyAsync(id);
     }
 }

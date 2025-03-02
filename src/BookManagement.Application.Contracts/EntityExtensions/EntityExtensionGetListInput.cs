@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Volo.Abp.Application.Dtos;
 
-namespace Arim.Ims.Equipments.EntityExtensions
+namespace BookManagement.EntityExtensions
 {
     public class EntityExtensionGetListInput : PagedAndSortedResultRequestDto
     {

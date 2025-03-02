@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Arim.Infrastructure.Inputs;
+using BookManagement;
+using BookManagement.EntityExtensions;
+using BookManagement.EquipmentTypes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Arim.Ims.Equipments.EntityExtensions;
-using Arim.Ims.Equipments.Permissions;
-using Arim.Infrastructure.Inputs;
-using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
 
 namespace Arim.Ims.Equipments.EquipmentTypes;
@@ -21,11 +21,6 @@ public class EquipmentTypeAppService(
     : CrudAppService<EquipmentType, EquipmentTypeDto, Guid, EquipmentTypeGetListInput, EquipmentTypeCreateInput, EquipmentTypeUpdateInput>(equipmentTypeRepository),
         IEquipmentTypeAppService
 {
-    protected override string GetPolicyName { get; set; } = EquipmentsPermissions.EquipmentType.Default;
-    protected override string GetListPolicyName { get; set; } = EquipmentsPermissions.EquipmentType.Default;
-    protected override string CreatePolicyName { get; set; } = EquipmentsPermissions.EquipmentType.Create;
-    protected override string UpdatePolicyName { get; set; } = EquipmentsPermissions.EquipmentType.Update;
-    protected override string DeletePolicyName { get; set; } = EquipmentsPermissions.EquipmentType.Delete;
 
     /// <summary>
     /// 创建设备类型
@@ -113,8 +108,6 @@ public class EquipmentTypeAppService(
     {
         var result = await GetAsync(id);
         input.EntityId = result.Id.ToString();
-        var entityProperties = (await entityExtensionIntegrationService.GetEntityPropertiesAsync(input.EntityId,input)).Items.ToList();
-        result.Properties = entityProperties;
         return result;
     }
 
@@ -133,8 +126,6 @@ public class EquipmentTypeAppService(
     {
         var result = await base.GetAsync(id);
         input.EntityId = result.Id.ToString();
-        var entityProperties = (await entityExtensionIntegrationService.GetEntityPropertiesAsync(input.EntityId,input)).Items.ToList();
-        result.Properties = entityProperties;
         return result;
     }
 }

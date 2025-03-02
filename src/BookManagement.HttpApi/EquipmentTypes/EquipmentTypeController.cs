@@ -1,9 +1,7 @@
-using Arim.Ims.Equipments.EntityExtensions;
 using Arim.Infrastructure.Inputs;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
-using Volo.Abp;
 using Volo.Abp.Application.Dtos;
 
 namespace Arim.Ims.Equipments.EquipmentTypes;
@@ -11,8 +9,6 @@ namespace Arim.Ims.Equipments.EquipmentTypes;
 /// <summary>
 /// 设备类型
 /// </summary>
-[Area(EquipmentsRemoteServiceConsts.ModuleName)]
-[RemoteService(Name = EquipmentsRemoteServiceConsts.RemoteServiceName)]
 [Route("api/equipments/equipment-types/")]
 public partial class EquipmentTypeController(IEquipmentTypeAppService equipmentTypeAppService)
 {
@@ -68,29 +64,5 @@ public partial class EquipmentTypeController(IEquipmentTypeAppService equipmentT
     public virtual async Task<PagedResultDto<EquipmentTypeDto>> GetListAsync(EquipmentTypeGetListInput input)
     {
         return await equipmentTypeAppService.GetListAsync(input);
-    }
-
-    /// <summary>
-    /// 获取设备类型详情
-    /// </summary>
-    /// <param name="id">设备类型 ID</param>
-    /// <param name="input">设备属性</param>
-    /// <returns>设备类型详情</returns>
-    [HttpGet("{id}")]
-    public virtual async Task<EquipmentTypeDto> GetAsync(Guid id, [FromQuery] EntityExtensionGetListInput input)
-    {
-        return await equipmentTypeAppService.GetAsync(id, input);
-    }
-
-    /// <summary>
-    /// 获取设备类型属性
-    /// </summary>
-    /// <param name="id">ID</param>
-    /// <param name="input">属性</param>
-    /// <returns>设备类型属性</returns>
-    [HttpGet("{id}/properties")]
-    public virtual async Task<EquipmentTypeDto> GetPropertiesAsync(Guid id, [FromQuery] EntityExtensionGetListInput input)
-    {
-        return await equipmentTypeAppService.GetPropertiesAsync(id, input);
     }
 }

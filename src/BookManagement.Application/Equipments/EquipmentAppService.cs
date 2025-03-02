@@ -1,6 +1,9 @@
-﻿using Arim.Ims.Equipments.EntityExtensions;
+﻿using Arim.DynamicQuery.Core.Filtering;
+using Arim.DynamicQuery.Services;
+using Arim.Ims.Equipments.Equipments;
 using Arim.Ims.Equipments.EquipmentTypes;
-using Microsoft.Extensions.Options;
+using Arim.Infrastructure.Inputs;
+using BookManagement.EquipmentTypes;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -21,12 +24,10 @@ public class EquipmentAppService(
     IEquipmentRepository equipmentRepository,
     IEquipmentManager equipmentManager,
     IDataStore dataStore,
-    IEntityExtensionIntegrationService entityExtensionIntegrationService,
     IEquipmentTypeRepository equipmentTypeRepository,
     IGuidGenerator guidGenerator,
     // IEquipmentFilter equipmentFilter,
-    IDynamicQueryRepository<Equipment> dynamicQueryRepository,
-    IOptions<OrganizationUnitFilter> options)
+    IDynamicQueryRepository<Equipment> dynamicQueryRepository)
     : DynamicQueryCrudAppService<EquipmentDto, Guid, EquipmentGetListInput, EquipmentCreateInput, EquipmentUpdateInput, Equipment>(equipmentRepository, dynamicQueryRepository),
         IEquipmentAppService
 {
@@ -129,10 +130,6 @@ public class EquipmentAppService(
     protected override async Task<IQueryable<Equipment>> CreateFilteredQueryAsync(EquipmentGetListInput input)
     {
         var querable = await base.CreateFilteredQueryAsync(input);
-        if (options.Value.IsEnabled)
-        {
-            //querable = await equipmentFilter.GetEquipmentQuerableAsync();
-        }
         var query = querable
                 .WhereIf(!input.Code.IsNullOrWhiteSpace(), x => x.Code!.Contains(input.Code!))
                 .WhereIf(!input.DisplayText.IsNullOrWhiteSpace(), x => x.DisplayText!.Contains(input.DisplayText!))
@@ -154,23 +151,6 @@ public class EquipmentAppService(
                 .WhereIf(!input.Status.IsNullOrEmpty(), x => x.Status == input.Status!)
                 .WhereIf(input.Kinds.IsAny(), x => input.Kinds!.Contains(x.Kind));
 
-        if (input.PropertyValues.IsAny())
-        {
-            var propertyValues = input.PropertyValues.Select(x => x.PropertyValue).ToList();
-            var propertyCodes = input.PropertyValues.Select(x => x.PropertyCode).ToList();
-            input.PropertyCodes = input.PropertyCodes.IsAny() ? propertyCodes : input.PropertyCodes.AddIfNotContains(propertyCodes).ToList();
-            var entityProperties = await entityPropertyRepository.GetListAsync(x => propertyCodes.Contains(x.PropertyCode));
-            entityProperties = entityProperties.Where(x => !string.IsNullOrEmpty(x.Value) && propertyValues.Any(pv => x.Value.Contains(pv))).ToList();
-            var entityIds = entityProperties.Where(x => Guid.TryParse(x.EntityId, out _)).Select(x => Guid.Parse(x.EntityId)).ToList();
-            if (entityIds.IsAny())
-            {
-                query = query.WhereIf(entityIds.IsAny(), x => entityIds.Contains(x.Id));
-            }
-            else
-            {
-                return Enumerable.Empty<Equipment>().AsQueryable();
-            }
-        }
         return query;
     }
     public override async Task<PagedResultDto<EquipmentDto>> GetListAsync(EquipmentGetListInput input)
@@ -187,20 +167,14 @@ public class EquipmentAppService(
         var result = await MapToGetListOutputDtosAsync(entities);
 
         var equipmentIds = result.Select(x => x.Id).ToList();
-        var equipmentStates = input.IncludeState
-            ? await GetEquipmentStatesAsync(equipmentIds)
-            : [];
+
         var infoInput = ObjectMapper.Map<EquipmentGetListInput, EquipmentGetInfoInput>(input);
         infoInput.EntityIds = entities.Select(x => x.Id.ToString());
         // 此处不能使用分页查询，否则会导致有些设备没有属性信息
         infoInput.IsPage = false;
-
-        var entityProperties = input.IncludeProperties
-            ? (await entityExtensionIntegrationService.GetEntityPropertiesAsync(infoInput.EntityId,infoInput)).Items.ToList()
-            : [];
         foreach (var item in result)
         {
-            await PopulateEquipmentDtoAsync(item, infoInput, entityProperties, equipmentStates);
+            await PopulateEquipmentDtoAsync(item, infoInput);
         }
 
         return new PagedResultDto<EquipmentDto>(totalCount, result);
@@ -210,15 +184,8 @@ public class EquipmentAppService(
         var result = await GetAsync(id);
 
         input.EntityId = result.Id.ToString();
-        var entityProperties = input.IncludeProperties
-            ? (await entityExtensionIntegrationService.GetEntityPropertiesAsync(input.EntityId,input)).Items.ToList()
-            : [];
 
-        var equipmentStates = input.IncludeState
-            ? await GetEquipmentStatesAsync([result.Id])
-            : [];
-
-        await PopulateEquipmentDtoAsync(result, input, entityProperties, equipmentStates);
+        await PopulateEquipmentDtoAsync(result, input);
 
         return result;
     }
@@ -234,32 +201,13 @@ public class EquipmentAppService(
     /// </summary>
     private async Task PopulateEquipmentDtoAsync(
     EquipmentDto item,
-    EquipmentGetInfoInput input,
-    List<EquipmentPropertyDto> entityProperties,
-    List<EquipmentStateDto> equipmentStates)
+    EquipmentGetInfoInput input)
     {
-        if (input.IncludeProperties)
-        {
-            item.Properties = entityProperties.Where(x => x.EntityId == item.Id.ToString()).ToList();
-        }
-        if (input.IncludeState)
-        {
-            item.States = equipmentStates.Where(x => x.EquipmentId == item.Id).ToList();
-        }
         if (input.IncludeEquipmentType && !item.EquipmentTypeCode.IsNullOrWhiteSpace())
         {
             var equipmentType = await dataStore.GetAsync<EquipmentType>(new Guid(item.EquipmentTypeCode));
             item.EquipmentType = ObjectMapper.Map<EquipmentType, EquipmentTypeDto>(equipmentType);
         }
-    }
-
-    /// <summary>
-    /// 获取设备状态列表
-    /// </summary>
-    private async Task<List<EquipmentStateDto>> GetEquipmentStatesAsync(List<Guid> equipmentIds)
-    {
-        var equipmentStates = await equipmentStateRepository.GetListAsync(x => equipmentIds.Contains(x.EquipmentId));
-        return ObjectMapper.Map<List<EquipmentState>, List<EquipmentStateDto>>(equipmentStates);
     }
 
     /// <summary>
@@ -275,64 +223,4 @@ public class EquipmentAppService(
         await equipmentRepository.UpdateAsync(entity);
     }
     #endregion
-
-    #region ==设备属性相关==
-
-    /// <summary>
-    /// 获取设备属性
-    /// </summary>
-    /// <param name="equipmentCode"></param>
-    /// <param name="input"></param>
-    /// <returns></returns>
-    public async Task<PagedResultDto<EquipmentPropertyDto>> GetPropertiesAsync(string equipmentCode, EntityExtensionGetListInput input)
-    {
-        //TODO:考虑并发，先做校验再添加
-        input.IsInclude = true;
-        var entityProperties = await entityExtensionIntegrationService.GetEntityPropertiesAsync(equipmentCode, input);
-        return entityProperties;
-    }
-
-    /// <summary>
-    /// 添加设备属性
-    /// </summary>
-    /// <param name="equipmentCode"></param>
-    /// <param name="input"></param>
-    /// <returns></returns>
-    public async Task<EntityPropertyDto> CreatePropertyAsync(string equipmentCode, EquipmentPropertyCreateInput input)
-    {
-        //TODO:考虑并发，先做校验再添加
-        var id = guidGenerator.Create();
-        var propertyCode = input.PropertyCode.IsNullOrEmpty() ? id.ToString() : input.PropertyCode;
-        var entityProperty = new EntityProperty(propertyCode, equipmentCode, input.EntityType, input.Value, input.ValueKind, input.MaxValue, input.MinValue, input.Remark, id: id);
-        var result = await entityPropertyRepository.InsertAsync(entityProperty);
-        return ObjectMapper.Map<EntityProperty, EntityPropertyDto>(result);
-    }
-
-    /// <summary>
-    /// 更新设备属性
-    /// </summary>
-    /// <param name="id"></param>
-    /// <param name="input"></param>
-    /// <returns></returns>
-    public async Task<EntityPropertyDto> UpdatePropertyAsync(Guid id, EquipmentPropertyUpdateInput input)
-    {
-        var entityPropertyUpdate = new UpdateEntityPropertyInput
-        {
-            ValueKind = input.ValueKind,
-            Value = input.Value,
-            MaxValue = input.MaxValue,
-            MinValue = input.MinValue,
-            Remark = input.Remark,
-            Rank = input.Rank,
-        };
-        return await entityPropertyIntegrationService.UpdateEntityPropertyAsync(id, entityPropertyUpdate);
-    }
-
-    public async Task DeletePropertyAsync(Guid id)
-    {
-        await entityPropertyIntegrationService.DeleteEntityPropertyByIdAsync(id);
-    }
-
-    #endregion
-
 }

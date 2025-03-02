@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using static Arim.Infrastructure.EntityExtension.EntityProperties.EntityPropertyConst;
 
-namespace Arim.Ims.Equipments.Equipments
+namespace BookManagement.Equipments
 {
     public class EquipmentPropertyCreateInput
     {

@@ -1,10 +1,10 @@
+using Arim.Ims.Equipments.EntityFrameworkCore;
+using BookManagement.EquipmentTypes.Exceptions;
 using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Arim.Ims.Equipments.EntityFrameworkCore;
-using Arim.Ims.Equipments.EquipmentTypes.Exceptions;
 using Volo.Abp.Domain.Repositories.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore;
 

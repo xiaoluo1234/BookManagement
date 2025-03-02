@@ -1,5 +1,6 @@
 using BookManagement;
 using BookManagement.Equipments;
+using BookManagement.EquipmentTypes;
 using Microsoft.EntityFrameworkCore;
 using Volo.Abp.Data;
 using Volo.Abp.EntityFrameworkCore;

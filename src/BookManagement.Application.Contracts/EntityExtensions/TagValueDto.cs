@@ -1,7 +1,7 @@
 ﻿using System;
 using Volo.Abp.Caching;
 
-namespace Arim.Ims.Equipments.EntityExtensions
+namespace BookManagement.EntityExtensions
 {
 
     [CacheName("TagValues")]
